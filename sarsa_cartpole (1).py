@@ -7,12 +7,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten
 from keras.optimizers import Adam
 
-from rl.agents.dqn import DQNAgent
+from rl.agents import SARSAAgent
 from rl.policy import BoltzmannQPolicy
-from rl.memory import SequentialMemory
 
 
 ENV_NAME = 'CartPole-v0'
+
 env = gym.make(ENV_NAME)
 np.random.seed(123)
 env.seed(123)
@@ -26,24 +26,24 @@ model.add(Dense(16))
 model.add(Activation('relu'))
 model.add(Dense(16))
 model.add(Activation('relu'))
-model.add(Dense(nb_actions, activation='linear'))
+model.add(Dense(nb_actions))
+model.add(Activation('linear'))
 
-memory = SequentialMemory(limit=50000, window_length=1)
 policy = BoltzmannQPolicy()
-dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=10,
-               enable_dueling_network=True, dueling_type='avg', target_model_update=1e-2, policy=policy)
-dqn.compile(Adam(lr=1e-3), metrics=['mae'])
+sarsa = SARSAAgent(model=model, nb_actions=nb_actions, nb_steps_warmup=10, policy=policy)
+sarsa.compile(Adam(lr=1e-3), metrics=['mae'])
 
-train_history=dqn.fit(env, nb_steps=50000, visualize=False, verbose=2)
+train_history=sarsa.fit(env, nb_steps=50000, visualize=False, verbose=2)
 
 train_reward=train_history.history['episode_reward']
 
-with open('ddqn_data.csv','w')as csv_file:
+with open('sarsa_data.csv','w')as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=',')
     csv_writer.writerow(train_reward)
 
-dqn.save_weights('duel_dqn_{}_weights.h5f'.format(ENV_NAME), overwrite=True)
+sarsa.save_weights('sarsa_{}_weights.h5f'.format(ENV_NAME), overwrite=True)
+
 train_reward=train_history.history['episode_reward']
 plt.plot(train_reward)
-plt.savefig('ddqn_cartpole')
-dqn.test(env, nb_episodes=5, visualize=True)
+plt.savefig('sarsa_cartpole')
+sarsa.test(env, nb_episodes=5, visualize=True)
