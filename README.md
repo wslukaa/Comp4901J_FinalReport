@@ -1,6 +1,8 @@
 # Comp4901J_FinalReport
 Comp4901J_FinalReport_Codes
 
+Course Grade: A- Received
+
 By Luk Wing San, Ip Ho Pan
 
 Some Codes on how we plot the graphs and using different reinforcement learning algorithms on cartpole and different Atari Games. 
